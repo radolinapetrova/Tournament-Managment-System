@@ -1,0 +1,37 @@
+﻿@page
+@model SportsTournamentWebApp.Pages.LogInModel
+@{
+}
+
+<link rel="stylesheet" href="~/css/logIn.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Lato&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+<body>
+    <div class="form">
+        <p>Log In</p>
+        
+        <form method="post">
+            <p class="user">Username</p>
+           @* <input type="text" asp-for="" class="username" name="username"/>
+            <span class="validation-message text-danger" asp-validation-for="LogInUser.Username"></span>*@
+
+            <p class="pass">Password</p>
+           @* <input type="password" asp-for="LogInUser.Password" class="password" name="password"/>
+            <span class="validation-message text-danger" asp-validation-for="LogInUser.Password"></span>*@
+
+            
+            <input name="button" value="LogIn" class="btnLogIn" type="submit">
+           
+
+            <hr>
+
+            <button name="button" value="Register" asp-action="check" class = "btnRegister" >Create an account</button>
+        </form>
+    </div>
+
+</body>

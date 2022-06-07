@@ -1,0 +1,13 @@
+﻿@page
+@model SportsTournamentWebApp.Pages.TournamentInfoModel
+@{
+    <h1>@Model.T.Title</h1>
+    <h2>Start date:  @Model.T.Info.StartDate</h2>
+    <h2>End date: @Model.T.Info.EndDate</h2>
+    <h2>Location: @Model.T.Info.Location</h2>
+    <h2>System: @Model.T.Info.System</h2>
+    <form method="post">
+    @*<button name="button" value="register" asp-action="check" class="btnRegister">Register for this tournament</button>*@
+    <button name="button" value="register" asp-route-id="@Model.T.Id">Register for this tournament</button>
+    </form>
+}

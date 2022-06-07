@@ -1,0 +1,14 @@
+﻿body {
+}
+
+.div{
+    min-width: 300px;
+    min-height: 100px;
+    width: auto;
+    height: auto;
+    background-color: black;
+}
+
+.div .a{
+    color: wheat;
+}
