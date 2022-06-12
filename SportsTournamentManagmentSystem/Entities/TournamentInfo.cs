@@ -27,8 +27,7 @@ namespace Entities
             get { return startDate; }
             private set
             {
-
-                if (value.CompareTo(DateTime.Now.AddDays(14)) < 0)
+                if (value.CompareTo(DateTime.Today.AddDays(14)) < 0)
                 {
                     throw new Exception("The start date of the tournament must be at least two weeks from now!");
                 }
@@ -97,9 +96,9 @@ namespace Entities
             this.sport = sport;
             this.description = description;
             this.startDate = start;
-            this.endDate = end;
-            this.minPlayers = minPlayers;
-            this.maxPlayers = maxPlayers;
+            this.EndDate = end;
+            this.MinPlayers = minPlayers;
+            this.MaxPlayers = maxPlayers;
             this.location = location;
             this.ts = ts;
         }

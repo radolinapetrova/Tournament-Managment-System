@@ -15,7 +15,6 @@ namespace Entities
 
         public void Add(Tournament t);
 
-        public void GetInfo(Tournament t);
 
     }
 }

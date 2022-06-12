@@ -1,0 +1,39 @@
+﻿@page
+@model SportsTournamentWebApp.Pages.AccountModel
+@{
+}
+
+
+<div class="form">
+    <p>Account information</p>
+
+    <form method="post">
+
+
+
+        <label> Email:</label>
+        <span asp-validation-for="CurrentUser.Email"></span>
+        <input asp-for="CurrentUser.Email" id="name">
+
+
+        <label> Phone number:</label>
+        <span asp-validation-for="CurrentUser.Phone"></span>
+        <input asp-for="CurrentUser.Phone" id="name">
+
+
+        <label> Password:</label>
+        <span asp-validation-for="CurrentUser.Password"></span>
+        <input type="password" asp-for="CurrentUser.Password" id="name">
+
+
+        <button name="button" value="change" type="submit">Change info</button>
+
+         <span>@ViewData["message"]</span>
+
+        <hr />
+
+
+        <button name="button" value="logout" asp-action="check" class="btnRegister">Log out</button>
+
+    </form>
+</div>

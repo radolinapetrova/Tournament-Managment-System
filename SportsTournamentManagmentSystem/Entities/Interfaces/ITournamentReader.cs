@@ -8,8 +8,8 @@ namespace Entities
 {
     public interface ITournamentReader
     {
-        public void Read(List<Tournament> list, int limit, int offset);
-
         public void Read(List<Tournament> list);
+
+        public void GetInfo(Tournament t);
     }
 }

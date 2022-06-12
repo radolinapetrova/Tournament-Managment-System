@@ -9,25 +9,25 @@ namespace Entities
 {
     public class RegisterUserDTO
     {
-        private string fname;
-        [Required(ErrorMessage = "Type something bitch")]
-        public string FName { get { return fname; } set { fname = value; } }
+        [Required(ErrorMessage = "This field is required!")]
+        public string FName { get; set; }
 
-        private string lname;
-        [Required(ErrorMessage = "Type something bitch")]
-        public string LName { get { return lname; } set { lname = value; } }
 
-        private string email;
-        [Required(ErrorMessage = "Type something bitch")]
-        public string Email { get { return email; } set { email = value; } }
+        [Required(ErrorMessage = "This field is required!")]
+        public string LName { get ; set;  }
 
-        private string phoneNumber;
-        [Required(ErrorMessage = "Type something bitch")]
-        public string PhoneNumber { get { return phoneNumber; } set { phoneNumber = value; } }
+        
+        [Required(ErrorMessage = "This field is required!")]
+        [DataType(DataType.EmailAddress, ErrorMessage = "The input is not valid")]
+        public string Email { get; set; }
 
-        private string password;
-        [Required(ErrorMessage = "Type something bitch")]
-        public String Password { get { return password; } set { password = value; } }
+        
+        [Required(ErrorMessage = "This field is required!")]
+        public string PhoneNumber { get; set; }
+
+        
+        [Required(ErrorMessage = "This field is required!")]
+        public string Password { get; set; }
 
     }
 }

@@ -9,45 +9,6 @@ namespace DataAccessLayer
     {
         MySqlConnection conn = DBConnection.Conn;
 
-
-        //Gets the tournaments for the users in the web application
-        public void Read(List<Tournament> t, int limit, int offset)
-        {
-            try
-            {
-                string sql = $"SELECT * FROM a_tournament  WHERE status IN ('open') ORDER BY start_date ASC LIMIT {limit} OFFSET {offset}; SELECT * FROM a_tournament_players WHERE tournament_id IN (SELECT id FROM a_tournament WHERE status = 'open' ORDER BY start_date ASC);";
-                MySqlCommand cmd = new MySqlCommand(sql, conn);
-                conn.Open();
-
-                MySqlDataAdapter adapter = new MySqlDataAdapter();
-                adapter.SelectCommand = cmd;
-
-                using (DataSet ds = new DataSet())
-                {
-                    adapter.Fill(ds);
-
-                    for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
-                    {
-                        //Getting the current number of participants without loading all their information
-                        //int nr = Convert.ToInt32(ds.Tables[1].Select($"tournament_id = {Convert.ToInt32(ds.Tables[0].Rows[i][0])}"));
-
-                        Tournament tr = new Tournament(Convert.ToInt32(ds.Tables[0].Rows[i][0]), ds.Tables[0].Rows[i][1].ToString(), (Status)Enum.Parse(typeof(Status), ds.Tables[0].Rows[i][10].ToString()), new TournamentInfo(SportType.GetST(ds.Tables[0].Rows[i][2].ToString()), ds.Tables[0].Rows[i][3].ToString(), ds.Tables[0].Rows[0][4].ToString(), ds.Tables[0].Rows[0][5].ToString(), Convert.ToInt32(ds.Tables[0].Rows[0][6].ToString()), Convert.ToInt32(ds.Tables[0].Rows[0][6].ToString()), ds.Tables[0].Rows[0][6].ToString(), TournamentSystem.GetTS(ds.Tables[0].Rows[0][9].ToString())));
-                        t.Add(tr);
-                    }
-                }
-            }
-            catch (MySqlException ex)
-            {
-                throw new ArgumentException("Database problem", ex);
-            }
-            finally
-            {
-                conn.Close();
-            }
-        }
-
-
-
         //Getting all the tournaments for the staff to access
         public void Read(List<Tournament> t)
         {
@@ -93,13 +54,13 @@ namespace DataAccessLayer
                 cmd.Parameters.AddWithValue("sport", t.Info.Sport);
                 cmd.Parameters.AddWithValue("title", t.Title);
                 cmd.Parameters.AddWithValue("description", t.Info.Description);
-                cmd.Parameters.AddWithValue("start", t.Info.StartDate);
-                cmd.Parameters.AddWithValue("end", t.Info.EndDate);
+                cmd.Parameters.AddWithValue("start", t.Info.StartDate.ToString("yyyy-MM-dd"));
+                cmd.Parameters.AddWithValue("end", t.Info.EndDate.ToString("yyyy-MM-dd"));
                 cmd.Parameters.AddWithValue("min", t.Info.MinPlayers);
                 cmd.Parameters.AddWithValue("max", t.Info.MaxPlayers);
                 cmd.Parameters.AddWithValue("location", t.Info.Location);
                 cmd.Parameters.AddWithValue("system", t.Info.System.ToString());
-                cmd.Parameters.AddWithValue("status", t.Status);
+                cmd.Parameters.AddWithValue("status", t.Status.ToString());
 
                 conn.Open();
 
@@ -122,7 +83,7 @@ namespace DataAccessLayer
 
         }
 
-        public void AddPlayer(Tournament t, User u)
+        public void AddUser(Tournament t, User u)
         {
 
             try
@@ -165,8 +126,8 @@ namespace DataAccessLayer
                 cmd.Parameters.AddWithValue("descr", t.Info.Description);
                 cmd.Parameters.AddWithValue("title", t.Title);
                 cmd.Parameters.AddWithValue("sport", t.Info.Sport);
-                cmd.Parameters.AddWithValue("start", t.Info.StartDate);
-                cmd.Parameters.AddWithValue("end", t.Info.EndDate);
+                cmd.Parameters.AddWithValue("start", t.Info.StartDate.ToString("yyyy-MM-dd"));
+                cmd.Parameters.AddWithValue("end", t.Info.EndDate.ToString("yyyy-MM-dd"));
                 cmd.Parameters.AddWithValue("min", t.Info.MinPlayers);
                 cmd.Parameters.AddWithValue("max", t.Info.MaxPlayers);
                 cmd.Parameters.AddWithValue("location", t.Info.Location);
@@ -289,11 +250,16 @@ namespace DataAccessLayer
 
                 if (t.Status == Status.open || t.Status == Status.closed || t.Status == Status.canceled)
                 {
-                    sql.Append($"SELECT * from a_tournament_players WHERE tournament_id = @id;");
+                    sql.Append($"SELECT tp.user_id, u.first_name FROM `a_tournament_players` tp INNER JOIN a_user u ON tp.user_id = u.id WHERE tournament_id = @id;");
                 }
                 else
                 {
-                    sql.Append($"SELECT * from a_tournament_game WHERE tournament_id = @id;");
+                    sql.Append($"SELECT tg.game_id, tg.round_id, tg.player_one_id, u.first_name, " +
+                        $"tg.player_one_score, tg.player_two_id, us.first_name, tg.player_two_score, tg.winner " +
+                        $"FROM a_tournament_game tg " +
+                        $"INNER JOIN a_user u ON tg.player_one_id = u.id " +
+                        $"INNER JOIN a_user us ON tg.player_two_id = us.id " +
+                        $"WHERE tournament_id = @id;");
                 }
 
                 MySqlCommand cmd = new MySqlCommand(sql.ToString(), conn);
@@ -319,12 +285,19 @@ namespace DataAccessLayer
 
                     for (int i = 0; i < ds.Tables[1].Rows.Count; i++)
                     {
-                        Game newGame = new Game(Convert.ToInt32(ds.Tables[1].Rows[i][1]), Convert.ToInt32(ds.Tables[1].Rows[i][2]), new Player(new User(Convert.ToInt32(ds.Tables[1].Rows[i][3]))), new Player(new User(Convert.ToInt32(ds.Tables[1].Rows[i][5]))));
+                        PlayerContainer p1 = new PlayerContainer();
+                        p1.User = new User(Convert.ToInt32(ds.Tables[1].Rows[i][2]), ds.Tables[1].Rows[i][3].ToString());
+
+                        PlayerContainer p2 = new PlayerContainer();
+                        p2.User = new User(Convert.ToInt32(ds.Tables[1].Rows[i][5]), ds.Tables[1].Rows[i][6].ToString());
+
+                        //Game newGame = new Game(Convert.ToInt32(ds.Tables[1].Rows[i][0]), Convert.ToInt32(ds.Tables[1].Rows[i][1]), new User(Convert.ToInt32(ds.Tables[1].Rows[i][2]), ds.Tables[1].Rows[i][3].ToString()), new User(Convert.ToInt32(ds.Tables[1].Rows[i][5]), ds.Tables[1].Rows[i][3].ToString()));
+                        Game newGame = new Game(Convert.ToInt32(ds.Tables[1].Rows[i][0]), Convert.ToInt32(ds.Tables[1].Rows[i][1]), p1, p2);
 
 
                         if (ds.Tables[1].Rows[i][7] != DBNull.Value)
                         {
-                            newGame.AssignResults(Convert.ToInt32(ds.Tables[1].Rows[i][4]), Convert.ToInt32(ds.Tables[1].Rows[i][6]), t);
+                            newGame.AssignResults(Convert.ToInt32(ds.Tables[1].Rows[i][4]), Convert.ToInt32(ds.Tables[1].Rows[i][7]), t);
                         }
 
                         games.Add(newGame);
@@ -338,7 +311,7 @@ namespace DataAccessLayer
 
                     for (int i = 0; i < ds.Tables[1].Rows.Count; i++)
                     {
-                        users.Add(new User(Convert.ToInt32(ds.Tables[1].Rows[i][1])));
+                        users.Add(new User(Convert.ToInt32(ds.Tables[1].Rows[i][0]), ds.Tables[1].Rows[i][1].ToString()));
                     }
                     t.AssignUsers(users);
                 }

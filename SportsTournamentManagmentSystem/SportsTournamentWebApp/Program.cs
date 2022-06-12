@@ -1,6 +1,29 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using DataAccessLayer;
+using Entities;
+using BusinessLogicLayer;
+using BusinessLogic;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+
+
+builder.Services.AddTransient<ITournamentManager, TournamnentDBManager>();
+builder.Services.AddTransient<ITournamentReader, TournamnentDBManager>();
+
+
+builder.Services.AddTransient<IUser, UserDBManager>();
+builder.Services.AddTransient<IAutoIncrement, UserDBManager>();
+
+builder.Services.AddSingleton<TournamentManager>();
+
+
+builder.Services.AddSingleton<UserManager>();
+
+
+
+
 
 // Add services to the container.
 builder.Services.AddRazorPages();
@@ -14,8 +37,8 @@ builder.Services.AddSession(options =>
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(
     options =>
     {
-        options.LoginPath = "/";
-        options.AccessDeniedPath = "/";
+        options.LoginPath = "/LogIn";
+        options.AccessDeniedPath = "/Index";
     });
 
 

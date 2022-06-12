@@ -85,6 +85,7 @@
             this.dtpStartDate = new System.Windows.Forms.DateTimePicker();
             this.dtpEndDate = new System.Windows.Forms.DateTimePicker();
             this.statusTimer = new System.Windows.Forms.Timer(this.components);
+            this.btnCloseTournament = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.gbResults.SuspendLayout();
@@ -287,9 +288,9 @@
             // 
             // btnGenerateSchedule
             // 
-            this.btnGenerateSchedule.Location = new System.Drawing.Point(582, 96);
+            this.btnGenerateSchedule.Location = new System.Drawing.Point(582, 37);
             this.btnGenerateSchedule.Name = "btnGenerateSchedule";
-            this.btnGenerateSchedule.Size = new System.Drawing.Size(206, 129);
+            this.btnGenerateSchedule.Size = new System.Drawing.Size(206, 110);
             this.btnGenerateSchedule.TabIndex = 4;
             this.btnGenerateSchedule.Text = "Generate schedule";
             this.btnGenerateSchedule.UseVisualStyleBackColor = true;
@@ -309,6 +310,7 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.btnCloseTournament);
             this.groupBox2.Controls.Add(this.btnCancelTournament);
             this.groupBox2.Controls.Add(this.btnGetTournamentByTitle);
             this.groupBox2.Controls.Add(this.btnFilterById);
@@ -673,11 +675,21 @@
             this.dtpEndDate.Size = new System.Drawing.Size(253, 27);
             this.dtpEndDate.TabIndex = 13;
             // 
+            // btnCloseTournament
+            // 
+            this.btnCloseTournament.Location = new System.Drawing.Point(459, 496);
+            this.btnCloseTournament.Name = "btnCloseTournament";
+            this.btnCloseTournament.Size = new System.Drawing.Size(141, 142);
+            this.btnCloseTournament.TabIndex = 43;
+            this.btnCloseTournament.Text = "Close for registration";
+            this.btnCloseTournament.UseVisualStyleBackColor = true;
+            this.btnCloseTournament.Click += new System.EventHandler(this.btnCloseTournament_Click_1);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1227, 1055);
+            this.ClientSize = new System.Drawing.Size(1227, 795);
             this.Controls.Add(this.tabControl1);
             this.Name = "Form1";
             this.Text = "Form1";
@@ -755,5 +767,6 @@
         private ComboBox cmbSportType;
         private Button btnCancelTournament;
         private System.Windows.Forms.Timer statusTimer;
+        private Button btnCloseTournament;
     }
 }

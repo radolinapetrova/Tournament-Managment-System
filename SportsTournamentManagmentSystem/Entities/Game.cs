@@ -10,36 +10,47 @@ namespace Entities
     {
         private int id;
         private int roundNr;
-        private Player playerOne;
-        private Player playerTwo;
-        private Player winner;
+        //private User playerOne;
+       // private User playerTwo;
+        //private User winner;
+
+        private PlayerContainer playerOne;
+        private PlayerContainer playerTwo;
+        private PlayerContainer winner;
+
+
+        private int playerOneScore;
+        private int playerTwoScore;
+
 
         public int Id { get { return id; } }
         public int RoundNr { get { return roundNr; } }
-        public Player? PlayerOne { get { return playerOne; } }
-        public Player? PlayerTwo { get { return playerTwo; } }
-        public Player? Winner { get { return winner; } }
+
+
+        public PlayerContainer PlayerOne { get { return playerOne; } }  
+        public PlayerContainer PlayerTwo { get { return playerTwo; } } 
+        public PlayerContainer Winner { get { return winner; } }
+
+
+        public int PlayerOneScore { get { return playerOneScore; } }
+        public int PlayerTwoScore { get { return playerTwoScore; } }
 
 
 
-        public Game(int id, int round, Player p1, Player p2)
+        public Game(int id, int round, PlayerContainer p1, PlayerContainer p2)
         {
             this.id = id;
             this.roundNr = round;
+
             this.playerOne = p1;
             this.playerTwo = p2;
-            //playerOne.GamePoints = 0;
-            //playerTwo.GamePoints = 0;
+            this.winner = new PlayerContainer();
 
-            if (playerOne != null && PlayerTwo != null)
+            if (playerOne.User != null && playerTwo.User != null)
             {
-                if (playerOne.User.Id == 0)
+                if (playerOne.User.Id == -1)
                 {
-                    this.winner = playerTwo;
-                }
-                else if (playerTwo.User.id == 0)
-                {
-                    this.winner = playerOne;
+                    this.winner.User = playerTwo.User;
                 }
             }
         }
@@ -48,13 +59,17 @@ namespace Entities
 
         public override string ToString()
         {
-            if (playerOne != null && playerTwo != null)
+            if (playerOne.User != null && playerTwo.User != null)
             {
                 return $"Round nr: {this.roundNr}\tGame nr: {this.id}\tPlayer one: {this.playerOne.User.Id}\tPlayer two: {this.playerTwo.User.Id}";
             }
-            else if (playerOne != null)
+            else if (playerOne.User != null)
             {
                 return $"Round nr: {this.roundNr}\tGame nr: {this.id}\tPlayer one: {this.playerOne.User.Id}\tPlayer two: Unknow player";
+            }
+            else if (playerTwo.User != null)
+            {
+                return $"Round nr: {this.roundNr}\tGame nr: {this.id}\tPlayer one: Unknown player\tPlayer two: {this.playerTwo.User.Id}";
             }
             else 
             {
@@ -65,25 +80,23 @@ namespace Entities
         public void AssignResults(int result1, int result2, Tournament t)
         {
             //Checking if the players have already been assigned a result
-            if (t.Status != Status.open && this.PlayerOne.GamePoints == 0 && this.PlayerTwo.GamePoints == 0)
+            if (t.Status != Status.scheduled || this.PlayerOneScore != 0 || this.playerTwoScore != 0 && this.PlayerOne.User != null || this.PlayerTwo.User != null)
             {
                 t.Info.Sport.CheckResult(result1, result2);
 
 
-                this.PlayerOne.GamePoints = result1;
-                this.PlayerTwo.GamePoints = result2;
+                this.playerOneScore = result1;
+                this.playerTwoScore = result2;
 
-
-                if (result1 > result2)
+                if (this.playerOneScore > playerTwoScore)
                 {
-                    this.PlayerOne.GameStatus = true;
-                    this.PlayerTwo.GameStatus = false;
+                    this.winner.User = playerOne.User;
                 }
                 else
                 {
-                    this.PlayerOne.GameStatus = false;
-                    this.PlayerTwo.GameStatus = true;
+                    this.winner.User = playerTwo.User;
                 }
+
             }
             else
             {

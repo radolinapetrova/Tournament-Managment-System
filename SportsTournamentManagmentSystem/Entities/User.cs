@@ -8,7 +8,7 @@ namespace Entities
 {
     public class User
     {
-        public int id;
+        private int id;
         private string firstName;
         private string familyName;
         private string phone;
@@ -29,19 +29,11 @@ namespace Entities
             this.account = account;
         }
 
-        public User(string name, string lname, string phone, Account account)
-        {
-            this.firstName=name;
-            this.familyName=lname;
-            this.phone = phone;
-            account = account;
-        }
-
-        public User(int id)
+        public User(int id, string name)
         {
             this.id = id;
+            this.firstName = name;
         }
-
 
         public override string ToString()
         {

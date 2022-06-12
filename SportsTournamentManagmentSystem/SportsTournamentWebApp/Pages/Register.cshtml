@@ -1,0 +1,41 @@
+﻿@page
+@model SportsTournamentWebApp.Pages.TournamentRegistrationModel
+@{
+    <div class="form">
+        <p>Register for a tournament</p>
+
+        <form method="post">
+
+            <label> First name::</label>
+            <span asp-validation-for="NewUser.FName"></span>
+            <input asp-for="NewUser.FName" id="name">
+
+            
+            <label> Last name:</label>
+            <span asp-validation-for="NewUser.LName"></span>
+            <input asp-for="NewUser.LName" id="name">
+
+            
+            <label> Email:</label>
+            <span asp-validation-for="NewUser.Email"></span>
+            <input asp-for="NewUser.Email" id="name">
+
+            
+            <label> Phone number:</label>
+            <span asp-validation-for="NewUser.PhoneNumber"></span>
+            <input asp-for="NewUser.PhoneNumber" id="name">
+
+            
+            <label> Password:</label>
+            <span asp-validation-for="NewUser.Password"></span>
+            <input type="password" asp-for="NewUser.Password" id="name">
+
+          
+            <button name="button" value="regster" type="submit">Create an account</button>
+
+             <span>@ViewData["message"]</span>
+
+
+        </form>
+    </div>
+}

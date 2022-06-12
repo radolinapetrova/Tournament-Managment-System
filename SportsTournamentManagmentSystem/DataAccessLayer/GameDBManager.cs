@@ -26,21 +26,36 @@ namespace DataAccessLayer
                 MySqlCommand cmd = new MySqlCommand(sql.ToString(), conn);
 
 
-                cmd.Parameters.AddWithValue($"tr", t);
+                cmd.Parameters.AddWithValue($"tr", t.Id);
 
                 for (int i = 0; i < t.Games.Count; i++)
                 {
                     cmd.Parameters.AddWithValue($"r{i}", t.Games[i].RoundNr);
                     cmd.Parameters.AddWithValue($"g{i}", t.Games[i].Id);
-                    if (t.Games[i].PlayerOne == null && t.Games[i].PlayerTwo == null)
+                    if (t.Games[i].PlayerOne.User == null && t.Games[i].PlayerTwo.User == null)
                     {
                         cmd.Parameters.AddWithValue($"plOne{i}", null);
                         cmd.Parameters.AddWithValue($"plTwo{i}", null);
                     }
                     else
                     {
-                        cmd.Parameters.AddWithValue($"plOne{i}", t.Games[i].PlayerOne.User.Id);
-                        cmd.Parameters.AddWithValue($"plTwo{i}", t.Games[i].PlayerTwo.User.Id);
+                        if (t.Games[i].PlayerOne.User == null)
+                        {
+                            cmd.Parameters.AddWithValue($"plOne{i}", null);
+                            cmd.Parameters.AddWithValue($"plTwo{i}", t.Games[i].PlayerTwo.User.Id);
+                        }
+                        else if (t.Games[i].PlayerTwo.User == null)
+                        {
+                            cmd.Parameters.AddWithValue($"plOne{i}", t.Games[i].PlayerOne.User.Id);
+                            cmd.Parameters.AddWithValue($"plTwo{i}", null);
+
+                        }
+                        else
+                        {
+                            cmd.Parameters.AddWithValue($"plOne{i}", t.Games[i].PlayerOne.User.Id);
+                            cmd.Parameters.AddWithValue($"plTwo{i}", t.Games[i].PlayerTwo.User.Id);
+                        }
+
                     }
                 }
 
@@ -65,31 +80,36 @@ namespace DataAccessLayer
             }
         }
 
-        
 
-        private Player GetWinner(Player p1, Player p2)
+
+        private int GetWinner(Game g)
         {
-            if (p1.GamePoints > p2.GamePoints)
+            if (g.PlayerOneScore > g.PlayerTwoScore)
             {
-                return p1;
+                return g.PlayerOne.User.Id;
             }
-            return p2;
+            return g.PlayerTwo.User.Id;
         }
 
-        public void Result(Tournament t,Game game)
+        public void Result(Tournament t, Game game)
         {
             try
             {
-                string sql = "UPDATE a_tournament_game SET player_one_score = @1score, player_two_score = @2score, winner = @win WHERE tournament_id = @tid AND round_id = @rid AND game_id = @gid;";
-
+                string sql = "UPDATE a_tournament_game SET player_one_score = @1score, player_one_id = @1id,player_two_score = @2score, player_two_id = @2id, winner = @win WHERE tournament_id = @tid AND round_id = @rid AND game_id = @gid;";
+                if (t.Status == Status.finished)
+                {
+                    sql += "UPDATE a_tournament SET status = 'finished' WHERE id = @tid";
+                }
                 MySqlCommand cmd = new MySqlCommand(sql, conn);
 
-                int first = game.PlayerOne.GamePoints;
-                int second = game.PlayerTwo.GamePoints;
+                int first = game.PlayerOneScore;
+                int second = game.PlayerTwoScore;
 
                 cmd.Parameters.AddWithValue("1score", first);
+                cmd.Parameters.AddWithValue("1id", game.PlayerOne.User.Id);
                 cmd.Parameters.AddWithValue("2score", second);
-                cmd.Parameters.AddWithValue("win", GetWinner(game.PlayerOne, game.PlayerTwo).User.Id);
+                cmd.Parameters.AddWithValue("2id", game.PlayerTwo.User.Id);
+                cmd.Parameters.AddWithValue("win", GetWinner(game));
                 cmd.Parameters.AddWithValue("tid", t.Id);
                 cmd.Parameters.AddWithValue("rid", game.RoundNr);
                 cmd.Parameters.AddWithValue("gid", game.Id);
@@ -98,10 +118,39 @@ namespace DataAccessLayer
 
                 int result = cmd.ExecuteNonQuery();
 
-                if (result != 1)
+                if (result != 1 && result != 2)
                 {
                     throw new ArgumentException("Database problem");
                 }
+            }
+            catch (MySqlException ex)
+            {
+                throw new ArgumentException("Database problem", ex);
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+
+
+        public void GetRanking()
+        {
+            Dictionary<int, int> ranking = new Dictionary<int, int>();
+
+            try
+            {
+                string sql = "SELECT winner, COUNT(*) as count FROM `a_tournament_game` WHERE tournament_id = 1 GROUP BY winner ORDER BY count DESC;";
+                MySqlCommand cmd = new MySqlCommand(sql, conn);
+                conn.Open();
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+
+                while (reader.Read())
+                {
+                   // ranking.Add();
+                }
+
             }
             catch (MySqlException ex)
             {

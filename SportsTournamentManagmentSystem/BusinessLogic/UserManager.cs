@@ -9,7 +9,9 @@ namespace BusinessLogicLayer
 {
     public class UserManager
     {
-        private static List<User> users = new List<User>();
+        private User user = null;
+
+        public User User { get { return user; }  }
         IUser manager;
         IAutoIncrement autoIncr;
 
@@ -22,8 +24,9 @@ namespace BusinessLogicLayer
         public void CreateAccount(User user)
         {
             manager.Add(user);
-            users.Add(user);
+            this.user = user;
         }
+
 
         public int GetId()
         {
@@ -39,15 +42,39 @@ namespace BusinessLogicLayer
             return pass;
         }
 
-        public User LogIn(LogInUserDTO user)
+        public string[] GetPass(string pass, string salt)
         {
-            User usr = manager.Read(user.Email, user.Password);
+            return new string[] { salt, PasswordHasher.Hash(pass + salt) };
+        }
+
+        public void LogIn(LogInUserDTO user)
+        {
+            User usr = manager.Read(user.Email);
 
             if (usr == null)
             {
                 throw new Exception("Your credentials are wrong hehe");
             }
-            return usr;
+
+            if (GetPass(user.Password, usr.Account.Salt)[1] != usr.Account.Password)
+            {
+                throw new Exception("Your credentials are wrong hehe");
+            }
+            this.user = usr;
+        }
+
+        public void GetUser(string email)
+        {
+            this.user = manager.Read(email);
+        }
+
+        public void Update(UpdateUser user)
+        {
+            string[] pass = GetPass(user.Password, this.user.Account.Salt);
+
+            User updatedUser = new User(this.user.Id, this.user.FisrtName, this.user.FamilyName, user.Phone, new Account(user.Email, pass[1], this.user.Account.Salt));
+
+           manager.Update(updatedUser);
         }
     }
 }

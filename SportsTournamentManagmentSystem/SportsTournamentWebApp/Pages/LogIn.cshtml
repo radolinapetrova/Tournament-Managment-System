@@ -14,23 +14,27 @@
 <body>
     <div class="form">
         <p>Log In</p>
-        
+
         <form method="post">
-            <p class="user">Username</p>
-           @* <input type="text" asp-for="" class="username" name="username"/>
-            <span class="validation-message text-danger" asp-validation-for="LogInUser.Username"></span>*@
 
-            <p class="pass">Password</p>
-           @* <input type="password" asp-for="LogInUser.Password" class="password" name="password"/>
-            <span class="validation-message text-danger" asp-validation-for="LogInUser.Password"></span>*@
 
-            
+            <label> Email:</label>
+            <span asp-validation-for="LogInUser.Email"></span>
+            <input asp-for="LogInUser.Email" id="name">
+
+            <label> Password:</label>
+            <span asp-validation-for="LogInUser.Password"></span>
+            <input type="password" asp-for="LogInUser.Password" id="name">
+
             <input name="button" value="LogIn" class="btnLogIn" type="submit">
-           
+            <span>@ViewData["message"]</span>
 
             <hr>
 
-            <button name="button" value="Register" asp-action="check" class = "btnRegister" >Create an account</button>
+
+            <button name="button" value="Register" asp-action="check" class="btnRegister">Create an account</button>
+
+
         </form>
     </div>
 

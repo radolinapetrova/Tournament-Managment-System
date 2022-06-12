@@ -8,14 +8,13 @@ namespace DataAccessLayer
     {
         MySqlConnection conn = DBConnection.Conn;
 
-        public User Read(string email, string pass)
+        public User Read(string email)
         {
             try
             {
-                string sql = "SELECT * FROM a_user WHERE email = @email AND password = @pass;";
+                string sql = "SELECT * FROM a_user WHERE email = @email;";
                 MySqlCommand cmd = new MySqlCommand(sql, conn);
                 cmd.Parameters.AddWithValue("email", email);
-                cmd.Parameters.AddWithValue("pass", pass);
                 conn.Open();
                 MySqlDataReader reader = cmd.ExecuteReader();
 
@@ -68,7 +67,41 @@ namespace DataAccessLayer
             }
             catch (MySqlException ex)
             {
-                throw new ArgumentException("Database problem", ex);
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                conn.Close();
+            }
+
+        }
+
+        public void Update(User user)
+        {
+            try
+            {
+                string sql = "UPDATE a_user  SET phone_number = @number, email = @email, password = @pass WHERE id = @id;";
+
+                MySqlCommand cmd = new MySqlCommand(sql, conn);
+
+                cmd.Parameters.AddWithValue("number", user.Phone);
+                cmd.Parameters.AddWithValue("email", user.Account.Email);
+                cmd.Parameters.AddWithValue("pass", user.Account.Password);
+                cmd.Parameters.AddWithValue("id", user.Id);
+
+                conn.Open();
+
+                int result = Convert.ToInt32(cmd.ExecuteNonQuery());
+
+                if (result != 1)
+                {
+                    throw new ArgumentException("The insertion in the database was not successfull");
+                }
+
+            }
+            catch (MySqlException ex)
+            {
+                throw new Exception(ex.Message);
             }
             finally
             {

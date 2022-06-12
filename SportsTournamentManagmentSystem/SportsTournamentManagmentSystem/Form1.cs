@@ -12,11 +12,14 @@ namespace SportsTournamentManagmentSystem
         {
             InitializeComponent();
             cmbTournamentSystem.DataSource = TournamentSystem.Systems;
+            cmbSportType.DataSource = SportType.SportTypes;
+            tm = new TournamentManager(new TournamnentDBManager(), new TournamnentDBManager(), new TournamnentDBManager());
+            gm = new GameManager(new GameDBManager());
             GetTournaments();
         }
 
-        TournamentManager tm = new TournamentManager(new TournamnentDBManager(), new TournamnentDBManager(), new TournamnentDBManager(), new TournamnentDBManager());
-        GameManager gm = new GameManager(new GameDBManager());
+        TournamentManager tm;
+        GameManager gm;
 
 
         //TOURNAMENT MANAGMENT(CRUD)//
@@ -25,7 +28,7 @@ namespace SportsTournamentManagmentSystem
             try
             {
                 //The start date of the torunament shoul be at least two weeks from now so people have at least one week to register
-                if (dtpStartDate.Value.CompareTo(DateTime.Now.AddDays(14)) >= 0 || dtpStartDate.Value.CompareTo(dtpEndDate.Value) <= 0)
+                if (dtpStartDate.Value.CompareTo(DateTime.Today.AddDays(14)) >= 0 || dtpStartDate.Value.CompareTo(dtpEndDate.Value) <= 0)
                 {
                     if (numMaxPlayers.Value >= 2 || numMinPlayers.Value >= 2 || numMaxPlayers.Value >= numMinPlayers.Value)
                     {
@@ -55,7 +58,7 @@ namespace SportsTournamentManagmentSystem
             lbEditTournaments.Items.Clear();
             lbTournaments.Items.Clear();
 
-            foreach (Tournament t in tm.StaffTournaments)
+            foreach (Tournament t in tm.Tournaments)
             {
                 lbEditTournaments.Items.Add(t);
                 lbTournaments.Items.Add(t);
@@ -112,23 +115,9 @@ namespace SportsTournamentManagmentSystem
                 {
                     Tournament tr = null;
 
-                    if (t.Status == Status.open)
-                    {
-                        //if the tournament is open for registration title, description, start date, end date and location can be changed
-                        tr = new Tournament(t.Id, tbTitle.Text, new TournamentInfo(t.Info.Sport, rtbDescription.Text, dtpStartDate.Value, dtpEndDate.Value, t.Info.MinPlayers, t.Info.MaxPlayers, tbLocation.Text, t.Info.System));
-                    }
-                    else if (t.Status == Status.closed)
-                    {
-                        //if the tournament is closed for registration only the start/emd date and location can be changed
-                        tr = new Tournament(t.Id, t.Title, new TournamentInfo(t.Info.Sport, t.Info.Description, dtpStartDate.Value, dtpEndDate.Value, t.Info.MinPlayers, t.Info.MaxPlayers, tbLocation.Text, t.Info.System));
-                    }
-                    else if (t.Status == Status.scheduled)
-                    {
-                        //if the tournament is closed for registration only the location can be changed
-                        tr = new Tournament(t.Id, t.Title, new TournamentInfo(t.Info.Sport, t.Info.Description, t.Info.StartDate, t.Info.EndDate, t.Info.MinPlayers, t.Info.MaxPlayers, tbLocation.Text, t.Info.System));
-                    }
+                    tr = new Tournament(t.Id, tbTitle.Text, t.Status, new TournamentInfo(t.Info.Sport, rtbDescription.Text, dtpStartDate.Value.ToString("yyyy-MM-dd"), dtpEndDate.Value.ToString("yyyy-MM-dd"), t.Info.MinPlayers, t.Info.MaxPlayers, tbLocation.Text, t.Info.System));
 
-                    tm.Update(tr);
+                    tm.Update(t, tr);
                     MessageBox.Show("Tournament info updated successfully!");
                     GetTournaments();
                 }
@@ -227,7 +216,6 @@ namespace SportsTournamentManagmentSystem
             {
                 tm.GetTournamentInfo(t);
                 btnGenerateSchedule.Enabled = false;
-
                 GetGames();
             }
             else
@@ -256,8 +244,8 @@ namespace SportsTournamentManagmentSystem
                 if (t.Status == Status.closed)
                 {
                     t.Info.System.GetGames(t);
-
                     gm.AddGames(t);
+                    GetGames();
                 }
                 else
                 {
@@ -269,7 +257,7 @@ namespace SportsTournamentManagmentSystem
             {
                 MessageBox.Show(ex.Message);
             }
-            
+
         }
 
         private void btmSaveResult_Click(object sender, EventArgs e)
@@ -277,7 +265,11 @@ namespace SportsTournamentManagmentSystem
             int result1 = Convert.ToInt32(tbResultPlayerOne.Text);
             int result2 = Convert.ToInt32(tbResultPlayerTwo.Text);
 
-            if ((result1 < 21 && result2 < 21) || result1 > 30 || result2 > 30 || ((result1 > 20 && result2 > 20) && (result2 < 29 && result1 < 29) && Math.Max(result1, result2) - Math.Min(result1, result2) != 2) || result2 == result1)
+            if (t.Status != Status.scheduled)
+            {
+                MessageBox.Show("You can't enter any results for this tournament!");
+            }
+            else if (result1 < 0 || result2 < 0)
             {
                 MessageBox.Show("The results you entered are invalid!");
             }
@@ -287,7 +279,7 @@ namespace SportsTournamentManagmentSystem
                 {
                     MessageBox.Show("Choose a game!");
                 }
-                else if (g.PlayerTwo.GamePoints != 0 || g.PlayerOne.GamePoints != 0)
+                else if (g.PlayerTwoScore != 0 || g.PlayerOneScore != 0)
                 {
                     MessageBox.Show("You can't edit the points of the players!");
                 }
@@ -306,7 +298,7 @@ namespace SportsTournamentManagmentSystem
                         MessageBox.Show(ex.Message);
                     }
                 }
-               
+
             }
         }
 
@@ -316,21 +308,31 @@ namespace SportsTournamentManagmentSystem
         {
             g = (Game)lbGames.SelectedItem;
 
-            lblPlayerOne.Text = g.PlayerOne.User.Id.ToString();
-            lblPlayerTwo.Text = g.PlayerTwo.User.Id.ToString();
-
-            if (g.PlayerOne.GamePoints != 0 && g.PlayerTwo.GamePoints != 0)
+            if (g.PlayerOne.User == null || g.PlayerTwo.User == null)
             {
-                tbResultPlayerOne.Text = g.PlayerOne.GamePoints.ToString();
-                tbResultPlayerTwo.Text = g.PlayerTwo.GamePoints.ToString();
-                btmSaveResult.Enabled = false;
+                MessageBox.Show("You can't enter results for this game");
             }
             else
             {
-                tbResultPlayerOne.Text = "";
-                tbResultPlayerTwo.Text = "";
-                btmSaveResult.Enabled = true;
+                lblPlayerOne.Text = g.PlayerOne.User.Id.ToString();
+                lblPlayerTwo.Text = g.PlayerTwo.User.Id.ToString();
+
+                if (g.PlayerOneScore != 0 && g.PlayerTwoScore != 0)
+                {
+                    tbResultPlayerOne.Text = g.PlayerOneScore.ToString();
+                    tbResultPlayerTwo.Text = g.PlayerTwoScore.ToString();
+                    btmSaveResult.Enabled = false;
+                }
+                else
+                {
+                    tbResultPlayerOne.Text = "";
+                    tbResultPlayerTwo.Text = "";
+                    btmSaveResult.Enabled = true;
+                }
             }
+
+
+
         }
 
 
@@ -342,7 +344,7 @@ namespace SportsTournamentManagmentSystem
             lb.Items.Clear();
 
             //Filtering the tournaments according to their status
-            foreach (Tournament t in tm.StaffTournaments)
+            foreach (Tournament t in tm.Tournaments)
             {
                 if (t.Status == status)
                 {
@@ -430,6 +432,31 @@ namespace SportsTournamentManagmentSystem
                 lbEditTournaments.Items.Add(item);
             }
         }
+        private void btnCloseTournament_Click_1(object sender, EventArgs e)
+        {
+            if (t.Info.StartDate.CompareTo(DateTime.Today.AddDays(7)) > 0)
+            {
+                MessageBox.Show("It is too early to close the tournament!");
+            }
+            else
+            {
+                tm.CloseTournament(t);
+            }
+        }
 
+        //I'll fix that.. some day
+
+        //private void SetTimer()
+        //{
+        //    var start = TimeSpan.Zero;
+        //    var period = TimeSpan.FromHours(6);
+
+        //    var timer = new System.Threading.Timer((e) =>
+        //    {
+        //        tm.CloseTournament();
+        //    }, null, start, period);
+        //}
     }
+
+
 }

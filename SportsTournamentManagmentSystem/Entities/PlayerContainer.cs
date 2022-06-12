@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace Entities
 {
-    public interface ITournamentManager
+    public class PlayerContainer
     {
-
-        public void AddUser(Tournament t, User u);
+        public User User;
     }
 }

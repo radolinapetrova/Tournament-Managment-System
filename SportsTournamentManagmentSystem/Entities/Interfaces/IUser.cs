@@ -9,6 +9,8 @@ namespace Entities
     public interface IUser
     {
         public void Add(User user);
-        public User Read(string identifier, string identifier2);
+        public User Read(string identifier);
+
+        public void Update(User user);
     }
 }

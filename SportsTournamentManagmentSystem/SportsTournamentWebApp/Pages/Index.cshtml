@@ -3,13 +3,47 @@
 @{
     ViewData["Title"] = "Home page";
 }
+@using System.Security.Claims;
+
 
 <link rel="stylesheet" href="./css/index.css">
 
-@for (int i = 0; i < @Model.Tournaments.Count; i++)
+@if (User.Identity.IsAuthenticated)
 {
+    <h3>Hello, @User.FindFirst(ClaimTypes.Name).Value</h3>
+}
+
+
+<h2>Currently available tournaments</h2>
+
+@for (int i = 0; i < @Model.OpenTournaments.Count; i++)
+{
+
     <div class="tr">
-        <a href="/TournamentInfo?id=@Model.Tournaments[i].Id">@Model.Tournaments[i].ToString()</a>
+        <a href="/TournamentInfo?id=@Model.OpenTournaments[i].Id">@Model.OpenTournaments[i].ToString()</a>
     </div>
-    
+
+}
+
+
+<h2>Finished tournaments</h2>
+
+@for (int i = 0; i < @Model.FinishedTournaments.Count; i++)
+{
+
+    <div class="tr">
+        <a href="/TournamentInfo?id=@Model.FinishedTournaments[i].Id">@Model.FinishedTournaments[i].ToString()</a>
+    </div>
+
+}
+
+<h2>Canceled tournaments</h2>
+
+@for (int i = 0; i < @Model.CanceledTournaments.Count; i++)
+{
+
+    <div class="tr">
+        <a href="/TournamentInfo?id=@Model.CanceledTournaments[i].Id">@Model.CanceledTournaments[i].ToString()</a>
+    </div>
+
 }
