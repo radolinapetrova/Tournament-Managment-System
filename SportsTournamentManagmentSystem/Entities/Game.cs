@@ -10,9 +10,6 @@ namespace Entities
     {
         private int id;
         private int roundNr;
-        //private User playerOne;
-       // private User playerTwo;
-        //private User winner;
 
         private PlayerContainer playerOne;
         private PlayerContainer playerTwo;

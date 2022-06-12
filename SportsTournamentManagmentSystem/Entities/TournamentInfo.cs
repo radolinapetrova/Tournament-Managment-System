@@ -15,7 +15,6 @@ namespace Entities
         private int minPlayers;
         private int maxPlayers;
         private string location;
-        private int n;//count of the players for when there is no need for all the users to be loaded
         private TournamentSystem ts;
 
 
